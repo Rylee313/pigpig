@@ -28,17 +28,21 @@ let score = 0;
 let combo = 1;
 let lives = 9;
 let animationFrameId;
+let difficultyMultiplier = 1;
 
 function startGame(speed) {
     gameSpeed = speed;
     document.getElementById('difficulty').style.display = 'none';
     canvas.style.display = 'block';
+    if (speed === 6) {
+        difficultyMultiplier = 1.5; // Increase difficulty for hard mode
+    }
     loop();
 }
 
 function createObstacle() {
-    const numBlocks = Math.floor(Math.random() * 5) + 3; // Random number of blocks
-    const blockHeight = 20; // Height of each block
+    const numBlocks = Math.floor(Math.random() * 5) + 3;
+    const blockHeight = 20;
     const gap = Math.random() * (canvas.height - 200) + 50;
     
     for (let i = 0; i < numBlocks; i++) {
@@ -163,19 +167,19 @@ function loop() {
     updateMovingObstacles();
     updateBombs();
 
-    if (Math.random() < 0.02) {
+    if (Math.random() < 0.02 * difficultyMultiplier) {
         createObstacle();
     }
 
-    if (Math.random() < 0.01) {
+    if (Math.random() < 0.01 * difficultyMultiplier) {
         createMovingObstacle();
     }
 
-    if (Math.random() < 0.01) {
+    if (Math.random() < 0.01 * difficultyMultiplier) {
         createBomb();
     }
 
-    gameSpeed += 0.001;
+    gameSpeed += 0.001 * difficultyMultiplier;
 
     animationFrameId = requestAnimationFrame(loop);
 }
