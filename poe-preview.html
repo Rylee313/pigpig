@@ -1,0 +1,270 @@
+<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>猪撞南墙</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            flex-direction: column;
+        }
+        #gameCanvas {
+            background-color: #fff;
+            display: none;
+        }
+        #difficulty, #restart, #gameOver {
+            position: absolute;
+        }
+        #difficulty {
+            top: 20px;
+            text-align: center;
+        }
+        #title {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+        #restart {
+            display: none;
+            top: 200px;
+        }
+        #gameOver {
+            display: none;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="difficulty">
+        <div id="title">《猪撞南墙》</div>
+        <button onclick="startGame(2)">简单</button>
+        <button onclick="startGame(4)">中等</button>
+        <button onclick="startGame(6)">困难</button>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+    <div id="restart">
+        <button onclick="restartGame()">重玩游戏</button>
+    </div>
+    <div id="gameOver">
+        <h2>游戏结束!</h2>
+        <p id="finalScore"></p>
+        <button onclick="restartGame()">重玩游戏</button>
+    </div>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const context = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const pigImage = new Image();
+        pigImage.src = 'https://i.imgur.com/C0QUUdq.png';
+
+        const lifeImage = new Image();
+        lifeImage.src = 'https://i.imgur.com/C9A5LoF.png';
+
+        const bombImage = new Image();
+        bombImage.src = 'https://i.imgur.com/339wcBE.png';
+
+        const player = {
+            x: 50,
+            y: canvas.height / 2 - 25,
+            width: 50,
+            height: 50
+        };
+
+        let obstacles = [];
+        let movingObstacles = [];
+        let bombs = [];
+        const obstacleWidth = 50;
+        let gameSpeed = 2;
+        let score = 0;
+        let combo = 1;
+        let lives = 9;
+        let animationFrameId;
+
+        function startGame(speed) {
+            gameSpeed = speed;
+            document.getElementById('difficulty').style.display = 'none';
+            canvas.style.display = 'block';
+            loop();
+        }
+
+        function createObstacle() {
+            const height = Math.random() * (canvas.height - 200) + 50;
+            obstacles.push({
+                x: canvas.width,
+                y: Math.random() < 0.5 ? 0 : canvas.height - height,
+                width: obstacleWidth,
+                height: height
+            });
+        }
+
+        function createMovingObstacle() {
+            const height = 50;
+            movingObstacles.push({
+                x: canvas.width,
+                y: Math.random() * (canvas.height - height),
+                width: obstacleWidth,
+                height: height,
+                direction: Math.random() < 0.5 ? 1 : -1
+            });
+        }
+
+        function createBomb() {
+            const size = 30;
+            bombs.push({
+                x: canvas.width,
+                y: Math.random() * (canvas.height - size),
+                width: size,
+                height: size
+            });
+        }
+
+        function updateObstacles() {
+            obstacles = obstacles.filter(obs => {
+                obs.x -= gameSpeed;
+                if (checkCollision(player, obs)) {
+                    score += 10 * combo;
+                    combo++;
+                    return false;
+                }
+                return obs.x + obs.width >= 0;
+            });
+        }
+
+        function updateMovingObstacles() {
+            movingObstacles = movingObstacles.filter(obs => {
+                obs.x -= gameSpeed;
+                obs.y += obs.direction * 2;
+                if (obs.y <= 0 || obs.y + obs.height >= canvas.height) {
+                    obs.direction *= -1;
+                }
+                if (checkCollision(player, obs)) {
+                    lives--;
+                    combo = 1;
+                    if (lives <= 0) {
+                        endGame();
+                    }
+                    return false;
+                }
+                return obs.x + obs.width >= 0;
+            });
+        }
+
+        function updateBombs() {
+            bombs = bombs.filter(bomb => {
+                bomb.x -= gameSpeed;
+                if (checkCollision(player, bomb)) {
+                    lives--;
+                    combo = 1;
+                    if (lives <= 0) {
+                        endGame();
+                    }
+                    return false;
+                }
+                return bomb.x + bomb.width >= 0;
+            });
+        }
+
+        function checkCollision(rect1, rect2) {
+            return rect1.x < rect2.x + rect2.width &&
+                   rect1.x + rect1.width > rect2.x &&
+                   rect1.y < rect2.y + rect2.height &&
+                   rect1.y + rect1.height > rect2.y;
+        }
+
+        function drawPlayer() {
+            context.drawImage(pigImage, player.x, player.y, player.width, player.height);
+        }
+
+        function drawObstacles() {
+            context.fillStyle = 'gray';
+            obstacles.forEach(obs => context.fillRect(obs.x, obs.y, obs.width, obs.height));
+        }
+
+        function drawMovingObstacles() {
+            context.fillStyle = 'orange';
+            movingObstacles.forEach(obs => context.fillRect(obs.x, obs.y, obs.width, obs.height));
+        }
+
+        function drawBombs() {
+            bombs.forEach(bomb => context.drawImage(bombImage, bomb.x, bomb.y, bomb.width, bomb.height));
+        }
+
+        function drawScore() {
+            context.fillStyle = 'black';
+            context.font = '24px Arial';
+            context.fillText('Score: ' + score, 20, 30);
+            for (let i = 0; i < lives; i++) {
+                context.drawImage(lifeImage, 20 + i * 35, 50, 30, 30);
+            }
+        }
+
+        function loop() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            drawPlayer();
+            drawObstacles();
+            drawMovingObstacles();
+            drawBombs();
+            drawScore();
+            updateObstacles();
+            updateMovingObstacles();
+            updateBombs();
+
+            if (Math.random() < 0.02) {
+                createObstacle();
+            }
+
+            if (Math.random() < 0.01) {
+                createMovingObstacle();
+            }
+
+            if (Math.random() < 0.01) {
+                createBomb();
+            }
+
+            animationFrameId = requestAnimationFrame(loop);
+        }
+
+        function endGame() {
+            cancelAnimationFrame(animationFrameId);
+            document.getElementById('gameOver').style.display = 'block';
+            document.getElementById('finalScore').innerText = '最终得分: ' + score;
+        }
+
+        function restartGame() {
+            score = 0;
+            lives = 9;
+            combo = 1;
+            obstacles = [];
+            movingObstacles = [];
+            bombs = [];
+            document.getElementById('difficulty').style.display = 'block';
+            document.getElementById('restart').style.display = 'none';
+            document.getElementById('gameOver').style.display = 'none';
+            canvas.style.display = 'none';
+        }
+
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            player.x = e.clientX - rect.left - player.width / 2;
+            player.y = e.clientY - rect.top - player.height / 2;
+        });
+
+        pigImage.onload = () => {
+            // Waiting for the user to select difficulty
+        };
+    </script>
+
+
+</body></html>
