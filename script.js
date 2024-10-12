@@ -46,6 +46,7 @@ function startGame(speed) {
     gameSpeed = speed;
     document.getElementById('difficulty').style.display = 'none';
     canvas.style.display = 'block';
+    document.getElementById('gameOver').style.display = 'none';
     if (speed === 6) {
         difficultyMultiplier = 2;
     }
@@ -212,6 +213,7 @@ function restartGame() {
     document.getElementById('difficulty').style.display = 'block';
     document.getElementById('restart').style.display = 'none';
     document.getElementById('gameOver').style.display = 'none';
+    document.getElementById('finalScore').innerText = ''; // 清空最终得分
     canvas.style.display = 'none';
 }
 
