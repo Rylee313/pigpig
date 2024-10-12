@@ -28,7 +28,6 @@ let gameSpeed = 2;
 let score = 0;
 let combo = 1;
 let lives = 9;
-let isShieldActive = false;
 let animationFrameId;
 
 function startGame(speed) {
@@ -69,17 +68,6 @@ function createBomb() {
     });
 }
 
-function createPowerUp() {
-    const size = 30;
-    powerUps.push({
-        x: canvas.width,
-        y: Math.random() * (canvas.height - size),
-        width: size,
-        height: size,
-        type: Math.random() < 0.5 ? 'shield' : 'extraLife'
-    });
-}
-
 function updateObstacles() {
     obstacles = obstacles.filter(obs => {
         obs.x -= gameSpeed;
@@ -100,12 +88,10 @@ function updateMovingObstacles() {
             obs.direction *= -1;
         }
         if (checkCollision(player, obs)) {
-            if (!isShieldActive) {
-                lives--;
-                combo = 1;
-                if (lives <= 0) {
-                    endGame();
-                }
+            lives--;
+            combo = 1;
+            if (lives <= 0) {
+                endGame();
             }
             return false;
         }
@@ -117,39 +103,15 @@ function updateBombs() {
     bombs = bombs.filter(bomb => {
         bomb.x -= gameSpeed;
         if (checkCollision(player, bomb)) {
-            if (!isShieldActive) {
-                lives--;
-                combo = 1;
-                if (lives <= 0) {
-                    endGame();
-                }
+            lives--;
+            combo = 1;
+            if (lives <= 0) {
+                endGame();
             }
             return false;
         }
         return bomb.x + bomb.width >= 0;
     });
-}
-
-function updatePowerUps() {
-    powerUps = powerUps.filter(powerUp => {
-        powerUp.x -= gameSpeed;
-        if (checkCollision(player, powerUp)) {
-            if (powerUp.type === 'shield') {
-                activateShield();
-            } else if (powerUp.type === 'extraLife') {
-                lives++;
-            }
-            return false;
-        }
-        return powerUp.x + powerUp.width >= 0;
-    });
-}
-
-function activateShield() {
-    isShieldActive = true;
-    setTimeout(() => {
-        isShieldActive = false;
-    }, 3000); // Shield lasts for 3 seconds
 }
 
 function checkCollision(rect1, rect2) {
@@ -177,13 +139,6 @@ function drawBombs() {
     bombs.forEach(bomb => context.drawImage(bombImage, bomb.x, bomb.y, bomb.width, bomb.height));
 }
 
-function drawPowerUps() {
-    powerUps.forEach(powerUp => {
-        context.fillStyle = powerUp.type === 'shield' ? 'blue' : 'green';
-        context.fillRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height);
-    });
-}
-
 function drawScore() {
     context.fillStyle = 'black';
     context.font = '24px Arial';
@@ -199,12 +154,10 @@ function loop() {
     drawObstacles();
     drawMovingObstacles();
     drawBombs();
-    drawPowerUps();
     drawScore();
     updateObstacles();
     updateMovingObstacles();
     updateBombs();
-    updatePowerUps();
 
     if (Math.random() < 0.02) {
         createObstacle();
@@ -216,10 +169,6 @@ function loop() {
 
     if (Math.random() < 0.01) {
         createBomb();
-    }
-
-    if (Math.random() < 0.01) {
-        createPowerUp();
     }
 
     gameSpeed += 0.001;
@@ -240,12 +189,10 @@ function restartGame() {
     obstacles = [];
     movingObstacles = [];
     bombs = [];
-    powerUps = [];
     document.getElementById('difficulty').style.display = 'block';
     document.getElementById('restart').style.display = 'none';
     document.getElementById('gameOver').style.display = 'none';
     canvas.style.display = 'none';
-    isShieldActive = false;
 }
 
 canvas.addEventListener('mousemove', (e) => {
