@@ -29,13 +29,18 @@ let animationFrameId;
 let difficultyMultiplier = 1;
 
 window.onload = () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
+    resizeCanvas();
     pigImage.onload = () => {
         document.getElementById('difficulty').style.display = 'block';
     };
 };
+
+window.addEventListener('resize', resizeCanvas);
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
 
 function startGame(speed) {
     gameSpeed = speed;
