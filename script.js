@@ -1,7 +1,5 @@
 const canvas = document.getElementById('gameCanvas');
 const context = canvas.getContext('2d');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
 
 const pigImage = new Image();
 pigImage.src = 'https://i.imgur.com/C0QUUdq.png';
@@ -30,12 +28,21 @@ let lives = 9;
 let animationFrameId;
 let difficultyMultiplier = 1;
 
+window.onload = () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    pigImage.onload = () => {
+        document.getElementById('difficulty').style.display = 'block';
+    };
+};
+
 function startGame(speed) {
     gameSpeed = speed;
     document.getElementById('difficulty').style.display = 'none';
     canvas.style.display = 'block';
     if (speed === 6) {
-        difficultyMultiplier = 2; // Higher multiplier for hard mode
+        difficultyMultiplier = 2;
     }
     loop();
 }
@@ -171,7 +178,7 @@ function loop() {
         createObstacle();
     }
 
-    if (Math.random() < 0.03 * difficultyMultiplier) { // Increase moving obstacle frequency
+    if (Math.random() < 0.03 * difficultyMultiplier) {
         createMovingObstacle();
     }
 
@@ -179,7 +186,7 @@ function loop() {
         createBomb();
     }
 
-    gameSpeed += 0.002 * difficultyMultiplier; // Increase speed faster
+    gameSpeed += 0.002 * difficultyMultiplier;
 
     animationFrameId = requestAnimationFrame(loop);
 }
@@ -209,6 +216,9 @@ canvas.addEventListener('mousemove', (e) => {
     player.y = e.clientY - rect.top - player.height / 2;
 });
 
-pigImage.onload = () => {
-    // Waiting for the user to select difficulty
-};
+canvas.addEventListener('touchmove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    player.x = touch.clientX - rect.left - player.width / 2;
+    player.y = touch.clientY - rect.top - player.height / 2;
+});
