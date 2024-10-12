@@ -3,24 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>猪撞南墙</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Pig Wall Bumper Game</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        #gameCanvas { display: none; }
+        #gameOver { display: none; }
+        #difficulty { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+    </style>
 </head>
 <body>
     <div id="difficulty">
-        <div id="title">《猪撞南墙》</div>
-        <button onclick="startGame(2)">简单</button>
-        <button onclick="startGame(4)">中等</button>
-        <button onclick="startGame(6)">困难</button>
+        <button onclick="startGame(2)">Start Easy</button>
+        <button onclick="startGame(4)">Start Medium</button>
+        <button onclick="startGame(6)">Start Hard</button>
     </div>
     <canvas id="gameCanvas"></canvas>
-    <div id="restart">
-        <button onclick="restartGame()">重玩游戏</button>
-    </div>
     <div id="gameOver">
-        <h2>游戏结束!</h2>
+        <h1>Game Over</h1>
         <p id="finalScore"></p>
-        <button onclick="restartGame()">重玩游戏</button>
+        <button onclick="restartGame()">Restart</button>
     </div>
     <script src="script.js"></script>
 </body>
