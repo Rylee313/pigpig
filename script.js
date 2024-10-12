@@ -1,7 +1,5 @@
 const canvas = document.getElementById('gameCanvas');
 const context = canvas.getContext('2d');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
 
 const pigImage = new Image();
 pigImage.src = 'https://i.imgur.com/C0QUUdq.png';
@@ -14,7 +12,7 @@ bombImage.src = 'https://i.imgur.com/339wcBE.png';
 
 const player = {
     x: 50,
-    y: canvas.height / 2 - 25,
+    y: window.innerHeight / 2 - 25,
     width: 50,
     height: 50
 };
@@ -28,22 +26,46 @@ let score = 0;
 let combo = 1;
 let lives = 9;
 let animationFrameId;
+let difficultyMultiplier = 1;
+
+window.onload = () => {
+    resizeCanvas();
+    pigImage.onload = () => {
+        document.getElementById('difficulty').style.display = 'block';
+    };
+};
+
+window.addEventListener('resize', resizeCanvas);
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
 
 function startGame(speed) {
     gameSpeed = speed;
     document.getElementById('difficulty').style.display = 'none';
     canvas.style.display = 'block';
+    document.getElementById('gameOver').style.display = 'none';
+    if (speed === 6) {
+        difficultyMultiplier = 2;
+    }
     loop();
 }
 
 function createObstacle() {
-    const height = Math.random() * (canvas.height - 200) + 50;
-    obstacles.push({
-        x: canvas.width,
-        y: Math.random() < 0.5 ? 0 : canvas.height - height,
-        width: obstacleWidth,
-        height: height
-    });
+    const numBlocks = Math.floor(Math.random() * 5) + 3;
+    const blockHeight = 20;
+    const gap = Math.random() * (canvas.height - 200) + 50;
+    
+    for (let i = 0; i < numBlocks; i++) {
+        obstacles.push({
+            x: canvas.width,
+            y: gap + i * blockHeight,
+            width: obstacleWidth,
+            height: blockHeight
+        });
+    }
 }
 
 function createMovingObstacle() {
@@ -158,19 +180,19 @@ function loop() {
     updateMovingObstacles();
     updateBombs();
 
-    if (Math.random() < 0.02) {
+    if (Math.random() < 0.02 * difficultyMultiplier) {
         createObstacle();
     }
 
-    if (Math.random() < 0.01) {
+    if (Math.random() < 0.03 * difficultyMultiplier) {
         createMovingObstacle();
     }
 
-    if (Math.random() < 0.01) {
+    if (Math.random() < 0.01 * difficultyMultiplier) {
         createBomb();
     }
 
-    gameSpeed += 0.001;
+    gameSpeed += 0.002 * difficultyMultiplier;
 
     animationFrameId = requestAnimationFrame(loop);
 }
@@ -191,6 +213,7 @@ function restartGame() {
     document.getElementById('difficulty').style.display = 'block';
     document.getElementById('restart').style.display = 'none';
     document.getElementById('gameOver').style.display = 'none';
+    document.getElementById('finalScore').innerText = '';
     canvas.style.display = 'none';
 }
 
@@ -200,6 +223,10 @@ canvas.addEventListener('mousemove', (e) => {
     player.y = e.clientY - rect.top - player.height / 2;
 });
 
-pigImage.onload = () => {
-    // Waiting for the user to select difficulty
-};
+canvas.addEventListener('touchmove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    player.x = touch.clientX - rect.left - player.width / 2;
+    player.y = touch.clientY - rect.top - player.height / 2;
+    e.preventDefault();
+});
