@@ -35,7 +35,7 @@ function startGame(speed) {
     document.getElementById('difficulty').style.display = 'none';
     canvas.style.display = 'block';
     if (speed === 6) {
-        difficultyMultiplier = 1.5; // Increase difficulty for hard mode
+        difficultyMultiplier = 2; // Higher multiplier for hard mode
     }
     loop();
 }
@@ -171,7 +171,7 @@ function loop() {
         createObstacle();
     }
 
-    if (Math.random() < 0.01 * difficultyMultiplier) {
+    if (Math.random() < 0.03 * difficultyMultiplier) { // Increase moving obstacle frequency
         createMovingObstacle();
     }
 
@@ -179,7 +179,7 @@ function loop() {
         createBomb();
     }
 
-    gameSpeed += 0.001 * difficultyMultiplier;
+    gameSpeed += 0.002 * difficultyMultiplier; // Increase speed faster
 
     animationFrameId = requestAnimationFrame(loop);
 }
