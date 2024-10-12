@@ -37,13 +37,18 @@ function startGame(speed) {
 }
 
 function createObstacle() {
-    const height = Math.random() * (canvas.height - 200) + 50;
-    obstacles.push({
-        x: canvas.width,
-        y: Math.random() < 0.5 ? 0 : canvas.height - height,
-        width: obstacleWidth,
-        height: height
-    });
+    const numBlocks = Math.floor(Math.random() * 5) + 3; // Random number of blocks
+    const blockHeight = 20; // Height of each block
+    const gap = Math.random() * (canvas.height - 200) + 50;
+    
+    for (let i = 0; i < numBlocks; i++) {
+        obstacles.push({
+            x: canvas.width,
+            y: gap + i * blockHeight,
+            width: obstacleWidth,
+            height: blockHeight
+        });
+    }
 }
 
 function createMovingObstacle() {
