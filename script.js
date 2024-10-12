@@ -28,6 +28,7 @@ let gameSpeed = 2;
 let score = 0;
 let combo = 1;
 let lives = 9;
+let isShieldActive = false;
 let animationFrameId;
 
 function startGame(speed) {
@@ -99,10 +100,12 @@ function updateMovingObstacles() {
             obs.direction *= -1;
         }
         if (checkCollision(player, obs)) {
-            lives--;
-            combo = 1;
-            if (lives <= 0) {
-                endGame();
+            if (!isShieldActive) {
+                lives--;
+                combo = 1;
+                if (lives <= 0) {
+                    endGame();
+                }
             }
             return false;
         }
@@ -114,10 +117,12 @@ function updateBombs() {
     bombs = bombs.filter(bomb => {
         bomb.x -= gameSpeed;
         if (checkCollision(player, bomb)) {
-            lives--;
-            combo = 1;
-            if (lives <= 0) {
-                endGame();
+            if (!isShieldActive) {
+                lives--;
+                combo = 1;
+                if (lives <= 0) {
+                    endGame();
+                }
             }
             return false;
         }
@@ -138,6 +143,13 @@ function updatePowerUps() {
         }
         return powerUp.x + powerUp.width >= 0;
     });
+}
+
+function activateShield() {
+    isShieldActive = true;
+    setTimeout(() => {
+        isShieldActive = false;
+    }, 3000); // Shield lasts for 3 seconds
 }
 
 function checkCollision(rect1, rect2) {
@@ -233,6 +245,7 @@ function restartGame() {
     document.getElementById('restart').style.display = 'none';
     document.getElementById('gameOver').style.display = 'none';
     canvas.style.display = 'none';
+    isShieldActive = false;
 }
 
 canvas.addEventListener('mousemove', (e) => {
