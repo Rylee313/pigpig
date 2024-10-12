@@ -22,7 +22,6 @@ const player = {
 let obstacles = [];
 let movingObstacles = [];
 let bombs = [];
-let powerUps = [];
 const obstacleWidth = 50;
 let gameSpeed = 2;
 let score = 0;
