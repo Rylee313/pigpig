@@ -211,7 +211,9 @@ function restartGame() {
     movingObstacles = [];
     bombs = [];
     document.getElementById('difficulty').style.display = 'block';
+    document.getElementById('restart').style.display = 'none';
     document.getElementById('gameOver').style.display = 'none';
+    document.getElementById('finalScore').innerText = '';
     canvas.style.display = 'none';
 }
 
