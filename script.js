@@ -12,7 +12,7 @@ bombImage.src = 'https://i.imgur.com/339wcBE.png';
 
 const player = {
     x: 50,
-    y: canvas.height / 2 - 25,
+    y: window.innerHeight / 2 - 25,
     width: 50,
     height: 50
 };
